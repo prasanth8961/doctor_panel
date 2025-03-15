@@ -1,28 +1,38 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { app } from "../Firebase/firebase_config";
 
-export const useFetch = (url) => {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+export const useFetch = (collectionName) => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error("Something went wrong. try agin...");
-                const result = await response.json();
-                setData(result);
-            } catch (error) {
-                setError(error.message || error);
-            } finally{
-                setLoading(false);
-            }
-        };
+  useEffect(() => {
+    const db = getFirestore(app); 
+    
+    const fetchData = async () => {
+      try {
+        const collectionRef = collection(db, collectionName);
+        const snapshot = await getDocs(collectionRef);
 
-        fetchData();
+        if (snapshot.empty) {
+          setData([]);
+        } else {
+          const fetchedData = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setData(fetchedData);
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    }, [url]);
+    fetchData();
+  }, [collectionName]);
 
-
-    return {data, loading, error};
-}
+  return { data, loading, error };
+};

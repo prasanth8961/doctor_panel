@@ -25,10 +25,10 @@ export const Patients = () => {
             <nav className="sticky top-0 z-50 flex items-center justify-between w-full bg-[#B9B4C7] px-10 h-16 shadow-md">
 
                 <div className="flex items-center md:space-x-10">
-                    <div onClick={() => setView("add")} className="cursor-pointer text-sm lg:text-xl font-semibold text-[#27374D] hover:border-b-2 border-b-cyan-950">
+                    <div onClick={() => setView("add")} className={` ${view === 'add' ? "border-b-2" : ""} cursor-pointer  text-sm lg:text-xl font-semibold text-[#27374D] hover:border-b-2 border-b-cyan-950`}>
                         NEW PATIENT
                     </div>
-                    <div onClick={() => setView("list")} className="cursor-pointer  text-sm lg:text-xl font-semibold text-[#27374D] hover:border-b-2 border-b-cyan-950">
+                    <div onClick={() => setView("list")} className={` ${view === 'list' ? "border-b-2" : "" } cursor-pointer  text-sm lg:text-xl font-semibold text-[#27374D] hover:border-b-2 border-b-cyan-95`}>
                         SHOW PATIENTS
                     </div>
                 </div>

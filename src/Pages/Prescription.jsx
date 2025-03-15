@@ -1,17 +1,20 @@
 import { useState } from "react";
+import { useFetch } from "../hooks/useFetch";
 
 export const Prescription = () => {
     const [selectedMedications, setSelectedMedications] = useState([]);
     const [medicationName, setMedicationName] = useState(null);
     const [quantityInput, setQuantityInput] = useState(1);
-    const medicationsList = [
-        { id: 1, name: "Acetaminophen", value: "acetaminophen" },
-        { id: 2, name: "Ibuprofen", value: "ibuprofen" },
-        { id: 3, name: "Naproxen", value: "naproxen" },
-        { id: 4, name: "Codeine", value: "codeine" },
-        { id: 5, name: "Tramadol", value: "tramadol" }
-    ];
-
+    // const medicationsList = [
+    //     { id: 1, name: "Acetaminophen", value: "acetaminophen" },
+    //     { id: 2, name: "Ibuprofen", value: "ibuprofen" },
+    //     { id: 3, name: "Naproxen", value: "naproxen" },
+    //     { id: 4, name: "Codeine", value: "codeine" },
+    //     { id: 5, name: "Tramadol", value: "tramadol" }
+    // ];
+    const {data: medicationsList , error , loading } =  useFetch("medications");
+    console.log(error)
+    console.log(medicationsList)
     const handleAddMedication = (medicationName) => {
         setSelectedMedications((prev) => {
             const existingMed = prev.find((med) => med.name === medicationName);
@@ -41,7 +44,7 @@ export const Prescription = () => {
                     >
                         <option value="" disabled selected>Select a medication</option>
                         {medicationsList.map((med) => (
-                            <option onClick={() => setMedicationName(med.name)} key={med.id} value={med.name}>{med.name}</option>
+                            <option onClick={() => setMedicationName(med.label)} key={med.id} value={med.value}>{med.label}</option>
                         ))}
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-gray-700">
