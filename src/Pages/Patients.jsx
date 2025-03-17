@@ -1,34 +1,64 @@
-import { useState } from "react"
-import { MdEdit } from "react-icons/md";
+import { useEffect, useState } from "react";
+import { useFetch } from "../hooks/useFetch";
+import { usePost } from "../hooks/usePost";
 import { useDispatch, useSelector } from "react-redux";
-import { createPatient } from "../App/Features/patient";
+import { setPatients } from '../App/Features/patient'
 
 export const Patients = () => {
 
     const [view, setView] = useState("list");
-    const patients = useSelector((state)=>state.patient.patients);
-    const dispatch = useDispatch();
+    const { data: patients } = useFetch("patients");
+    const { postData, loading } = usePost("patients");
+    const [selectedGender, setSelectedGender] = useState("all")
+    const [searchQuery, setSearchQuery] = useState("");
 
-    console.log(patients);
+    const [filteredPatients, setFilteredPatients] = useState([]);
 
-    const handleFormSubmit = (e) => {
+    useEffect(() => {
+        setFilteredPatients(patients);
+    }, [patients])
+
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
-        const patientData =  Object.fromEntries(formData.entries());
+        const patientData = Object.fromEntries(formData.entries());
         patientData['id'] = new Date().getTime().toString().slice(-4);
-        dispatch(createPatient(patientData));
+
+        const result = await postData(patientData);
+        if (result) {
+            console.log("Patient added successfully:", result);
+            setFilteredPatients((prev) => [...prev, result]);
+        }
         e.target.reset();
+    };
+
+    const handleSearchInputChange = (e) => {
+        const searchQuery = e.target.value;
+        setSearchQuery(searchQuery);
+        const filteredData = patients.filter((patient) =>
+            patient.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setFilteredPatients(filteredData)
     }
+
+    const handleGenderInputChange = (e) => {
+        const gender = e.target.value;
+        const filteredData = patients.filter((patient) =>
+            patient.gender === gender.toLowerCase() 
+        );
+        setFilteredPatients(filteredData);
+    }
+    
+
 
     return (
         <div className="select-none">
             <nav className="sticky top-0 z-50 flex items-center justify-between w-full bg-[#B9B4C7] px-10 h-16 shadow-md">
-
                 <div className="flex items-center md:space-x-10">
                     <div onClick={() => setView("add")} className={` ${view === 'add' ? "border-b-2" : ""} cursor-pointer  text-sm lg:text-xl font-semibold text-[#27374D] hover:border-b-2 border-b-cyan-950`}>
                         NEW PATIENT
                     </div>
-                    <div onClick={() => setView("list")} className={` ${view === 'list' ? "border-b-2" : "" } cursor-pointer  text-sm lg:text-xl font-semibold text-[#27374D] hover:border-b-2 border-b-cyan-95`}>
+                    <div onClick={() => setView("list")} className={` ${view === 'list' ? "border-b-2" : ""} cursor-pointer  text-sm lg:text-xl font-semibold text-[#27374D] hover:border-b-2 border-b-cyan-95`}>
                         SHOW PATIENTS
                     </div>
                 </div>
@@ -45,6 +75,8 @@ export const Patients = () => {
                                 <input
                                     type="text"
                                     placeholder="Search..."
+                                    value={searchQuery}
+                                    onChange={(e) => handleSearchInputChange(e)}
                                     className="ml-3 bg-transparent focus:outline-none text-gray-700 placeholder-gray-400"
                                 />
                             </div>
@@ -54,6 +86,8 @@ export const Patients = () => {
                                 <select
                                     name="gender"
                                     id="all"
+                                    value={selectedGender}
+                                    onChange={(e) => handleGenderInputChange(e)}
                                     className="block w-full bg-white border border-gray-300 text-gray-700 py-2 px-3 pr-10 rounded leading-tight focus:outline-none focus:ring focus:border-blue-300 appearance-none"
                                 >
                                     <option value="all">All</option>
@@ -79,7 +113,7 @@ export const Patients = () => {
                                 <h3 className="font-semibold text-blue-900">FILL NEW PATIENT INFORMATION</h3>
 
                                 <form autoComplete="off" className="min-w-[50vw] mx-auto bg-white p-6  m-10 rounded-lg shadow-sm" action="#" method="post" onSubmit={(e) => handleFormSubmit(e)}>
-                                    
+
                                     <div className="mb-4">
                                         <label htmlFor="name" className="block text-gray-700 font-medium mb-2">Name</label>
                                         <input
@@ -90,7 +124,7 @@ export const Patients = () => {
                                         />
                                     </div>
 
-                                   
+
                                     <div className="mb-4">
                                         <label htmlFor="age" className="block text-gray-700 font-medium mb-2">Age</label>
                                         <input
@@ -101,7 +135,7 @@ export const Patients = () => {
                                         />
                                     </div>
 
-                                    
+
                                     <div className="mb-4">
                                         <span className="block text-gray-700 font-medium mb-2">Gender</span>
                                         <div className="flex items-center space-x-4">
@@ -126,7 +160,7 @@ export const Patients = () => {
                                         </div>
                                     </div>
 
-                                   
+
                                     <div className="mb-4">
                                         <label htmlFor="contact" className="block text-gray-700 font-medium mb-2">Contact</label>
                                         <input
@@ -137,7 +171,7 @@ export const Patients = () => {
                                         />
                                     </div>
 
-                                    
+
                                     <div className="mb-4">
                                         <label htmlFor="city" className="block text-gray-700 font-medium mb-2">City</label>
                                         <input
@@ -148,14 +182,16 @@ export const Patients = () => {
                                         />
                                     </div>
 
-                                    
+
                                     <div className="flex justify-end">
                                         <button
                                             type="submit"
-                                            className="bg-[#474E68] hover:bg-[#272829] text-white font-medium py-2 px-4 rounded transition-colors cursor-pointer"
+                                            disabled={loading}
+                                            className={`relative bg-[#474E68] hover:bg-[#272829] text-white font-medium py-2 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-md ${loading ? "blur-sm opacity-50 cursor-not-allowed" : "hover:scale-105 hover:shadow-lg"}`}
                                         >
-                                            Submit
+                                            {loading ? "Submitting..." : "Submit"}
                                         </button>
+
                                     </div>
                                 </form>
 
@@ -169,7 +205,7 @@ export const Patients = () => {
                 {
                     view === "list" && (<>
                         <div className="p-4 text-[#0A043C]">
-                            
+
                             <div className="grid gap-4 text-md font-bold text-[#0F044C] border-b pb-2 grid-cols-[1fr_2fr_1fr_2fr_2fr_2fr_auto]">
                                 <div>ID</div>
                                 <div>NAME</div>
@@ -180,8 +216,8 @@ export const Patients = () => {
                                 <div>EDIT</div>
                             </div>
 
-                           
-                            {patients.map((patient) => (
+
+                            {filteredPatients.map((patient) => (
                                 <div
                                     key={patient.id}
                                     className="grid  gap-4 py-3 items-center border-b grid-cols-[1fr_2fr_1fr_2fr_2fr_2fr_auto]"

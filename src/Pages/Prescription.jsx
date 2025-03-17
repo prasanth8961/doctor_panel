@@ -5,13 +5,6 @@ export const Prescription = () => {
     const [selectedMedications, setSelectedMedications] = useState([]);
     const [medicationName, setMedicationName] = useState(null);
     const [quantityInput, setQuantityInput] = useState(1);
-    // const medicationsList = [
-    //     { id: 1, name: "Acetaminophen", value: "acetaminophen" },
-    //     { id: 2, name: "Ibuprofen", value: "ibuprofen" },
-    //     { id: 3, name: "Naproxen", value: "naproxen" },
-    //     { id: 4, name: "Codeine", value: "codeine" },
-    //     { id: 5, name: "Tramadol", value: "tramadol" }
-    // ];
     const {data: medicationsList , error , loading } =  useFetch("medications");
     console.log(error)
     console.log(medicationsList)

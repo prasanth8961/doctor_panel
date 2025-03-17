@@ -13,6 +13,9 @@ export const patientSlice = createSlice({
             state.patients = state.patients.map((patient)=> (patient.id === action.payload.id) 
                         ? {...patient , name : action.payload.name || patient.name, age : action.payload.age || patient.age, contact : action.payload.contact || patient.contact } : patient)
         },
+        setPatients : (state, action) => {
+            state.patients = action.payload
+        },
         removePatient : (state, action) => {
             state.patients = state.patients.filter((patient)=>patient.id !== action.payload.id);
         }
@@ -20,4 +23,4 @@ export const patientSlice = createSlice({
 });
 
 
-export const {createPatient , updatePatient , removePatient} = patientSlice.actions;
+export const {createPatient , updatePatient , setPatients, removePatient} = patientSlice.actions; 
