@@ -3,6 +3,7 @@ import { Routes , Route } from "react-router-dom";
 import { Dashboard } from "./Pages/Dashboard";
 import { Patients } from "./Pages/Patients";
 import { Prescription } from "./Pages/Prescription";
+import { Prescription1 } from "./Pages/Prescription_1.0";
 
 function App() {
   return (
@@ -14,7 +15,7 @@ function App() {
             <Routes>
               <Route index path="/" Component={Dashboard}/>
               <Route path="/patients" Component={Patients}/>
-              <Route path="/prescription" Component={Prescription}/>
+              <Route path="/prescription" Component={Prescription1}/>
             </Routes>
          
           
