@@ -42,38 +42,38 @@ export const Patients = () => {
   }, [patients]);
 
   useEffect(() => {
-  filterPatients(debouncedSearch, selectedGender);
-}, [debouncedSearch, selectedGender]);
+    filterPatients(debouncedSearch, selectedGender);
+  }, [debouncedSearch, selectedGender]);
 
 
- 
-const handleSearchInputChange = (e) => {
-  setSearchQuery(e.target.value);
-};
 
-const handleGenderInputChange = (e) => {
-  setSelectedGender(e.target.value);
-};
+  const handleSearchInputChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
 
-const filterPatients = (query, gender) => {
-  let results = [...patients];
+  const handleGenderInputChange = (e) => {
+    setSelectedGender(e.target.value);
+  };
 
-  if (gender !== "all") {
-    results = results.filter(
-      (p) => p.personalInfo.gender.toLowerCase() === gender
-    );
-  }
+  const filterPatients = (query, gender) => {
+    let results = [...patients];
 
-  if (query.trim()) {
-    results = results.filter((p) =>
-      (p.personalInfo.firstName + p.personalInfo.lastName)
-        .toLowerCase()
-        .includes(query.toLowerCase())
-    );
-  }
+    if (gender !== "all") {
+      results = results.filter(
+        (p) => p.personalInfo.gender.toLowerCase() === gender
+      );
+    }
 
-  setFilteredPatients(results);
-};
+    if (query.trim()) {
+      results = results.filter((p) =>
+        (p.personalInfo.firstName + p.personalInfo.lastName)
+          .toLowerCase()
+          .includes(query.toLowerCase())
+      );
+    }
+
+    setFilteredPatients(results);
+  };
 
 
   const handleFormSubmit = async (e) => {
@@ -263,54 +263,6 @@ const filterPatients = (query, gender) => {
 
       <main className="p-4 overflow-y-auto">
         {view === "add" && (
-          // <form
-          //     autoComplete="off"
-          //     className="max-w-lg bg-white mx-auto mt-10 p-6 rounded-lg shadow-sm"
-          //     onSubmit={handleFormSubmit}
-          // >
-          //     <h2 className="text-lg font-semibold text-blue-900 mb-4">Add New Patient</h2>
-
-          //     {["name", "age", "contact", "city"].map((field) => (
-          //         <div className="mb-4" key={field}>
-          //             <label className="block text-gray-700 font-medium mb-2 capitalize">{field}</label>
-          //             <input
-          //                 name={field}
-          //                 type="text"
-          //                 required
-          //                 className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-          //             />
-          //         </div>
-          //     ))}
-
-          //     
-          //     <div className="mb-4">
-          //         <label className="block text-gray-700 font-medium mb-2">Gender</label>
-          //         <div className="flex space-x-4">
-          //             {["male", "female"].map((gender) => (
-          //                 <label key={gender} className="inline-flex items-center">
-          //                     <input
-          //                         type="radio"
-          //                         name="gender"
-          //                         value={gender}
-          //                         required
-          //                         className="form-radio text-blue-500"
-          //                     />
-          //                     <span className="ml-2 capitalize">{gender}</span>
-          //                 </label>
-          //             ))}
-          //         </div>
-          //     </div>
-
-          //     <div className="flex justify-end">
-          //         <button
-          //             type="submit"
-          //             disabled={loading}
-          //             className={`bg-[#474E68] hover:bg-[#272829] text-white py-2 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-md cursor-pointer ${loading ? "blur-sm opacity-50 cursor-not-allowed" : "hover:scale-105"}`}
-          //         >
-          //             {loading ? "creating..." : "create"}
-          //         </button>
-          //     </div>
-          // </form>
           <AddPatientForm />
         )}
 
