@@ -1,19 +1,21 @@
 import { useState } from "react";
 import { useFetch } from "../hooks/useFetch";
 import { MdShoppingCart } from "react-icons/md";
+import { client } from "../Twillio/config";
 
 export const Prescription = () => {
     const [selectedMedications, setSelectedMedications] = useState([]);
-    const [medicationName, setMedicationName] = useState(null);
+    const [medicationName, setMedicationName] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [quantityInput, setQuantityInput] = useState("");
     const { data: medicationsList, error, loading } = useFetch("medications");
+    const [showPop, setShowPop] = useState(false);
+    const [mobileNumber, setMobileNumber] = useState('');
 
     const handleAddMedication = (medicationName) => {
         if (!quantityInput || !medicationName) return;
         setSelectedMedications((prev) => {
             const existingMed = prev.find((med) => med.name === medicationName);
-            console.log(existingMed);
             if (existingMed) {
                 return prev.map((med) =>
                     med.name === medicationName ? { ...med, quantity: med.quantity + quantityInput } : med
@@ -24,6 +26,31 @@ export const Prescription = () => {
         });
         setQuantityInput("");
     };
+
+    const handleOTPSend = async() => {
+        if(!mobileNumber || isNaN(mobileNumber) ) return; 
+        try{
+            const res = await fetch("https://your-vercel-project.vercel.app/api/send-sms", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ to:mobileNumber, message: 'OTP send successfully'}),
+            });
+
+            const data = await res.json();
+            console.log(data);
+        //    const msg = await  client.messages.create({
+        //     from: +16202936339,
+        //     to: '+91' + mobileNumber,
+        //     body: '',
+        //    });
+        }catch(e){
+
+        }
+        setShowPop(false);
+        setMobileNumber('')
+    }
 
     const handleRemoveMedication = (name) => {
         setSelectedMedications(selectedMedications.filter((selected) => selected.name !== name))
@@ -69,12 +96,10 @@ export const Prescription = () => {
 
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-gray-700">
                         {isDropdownOpen ? (
-                            // Up arrow icon
                             <svg className="fill-current h-4 w-4" viewBox="0 0 20 20">
                                 <path d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414 6.707 12.707a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
                             </svg>
                         ) : (
-                            // Down arrow icon
                             <svg className="fill-current h-4 w-4" viewBox="0 0 20 20">
                                 <path d="M7.293 7.293a1 1 0 011.414 0L12 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                             </svg>
@@ -131,12 +156,34 @@ export const Prescription = () => {
                             <MdShoppingCart size={35} color="#1e5f74" />
                             <span className="text-blue-950 bg-blue-100 w-4 h-4 rounded-full absolute -top-1 right-1 flex items-center justify-center font-bold text-sm p-1">{selectedMedications.length}</span>
                         </div>
-                        <button className="border border-[#474E68] px-4 py-2 bg-[#474E68] hover:bg-[#272829] cursor-pointer text-white font-bold rounded-lg">
+                        <button onClick={()=>setShowPop(true)} className="border border-[#474E68] px-4 py-2 bg-[#474E68] hover:bg-[#272829] cursor-pointer text-white font-bold rounded-lg">
                             Send OTP
                         </button>
                     </div>
                 </div>
             )}
+
+            {
+                showPop && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-md z-50 ">
+                        <div className="bg-white py-6 px-10 pb-10 rounded-lg shadow-lg relative">
+                           <input type="text" onChange={(e)=>setMobileNumber(Number(e.target.value.trim()))} name="phoneNumber" id="number" placeholder="Enter phone number" className="border-2 border-gray-300 py-2 px-4 mt-2 rounded-md" />
+                             <button
+                             onClick={handleOTPSend}
+                                className="mt-4 ml-4 px-6 py-2 bg-blue-900 text-white rounded hover:bg-blue-950 cursor-pointer"
+                            >
+                                Send
+                            </button>
+                             <div
+                                onClick={() => setShowPop(false)}
+                                className=" absolute top-0 right-0 bg-red-400 px-2 text-white rounded-bl-md rounded-tr-md font-semibold hover:bg-red-500 cursor-pointer"
+                            >
+                                X
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
         </div>
     );
 };
