@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useFetch } from "../hooks/useFetch";
 import { MdShoppingCart } from "react-icons/md";
-import { client } from "../Twillio/config";
 
 export const Prescription = () => {
     const [selectedMedications, setSelectedMedications] = useState([]);
