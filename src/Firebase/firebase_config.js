@@ -1,15 +1,15 @@
 import { initializeApp } from "firebase/app";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyC2CLn3qquqk86v9hzL4-MBptvfLz7R0J0",
-  authDomain: "drugdispenser-mz.firebaseapp.com",
-  databaseURL: "https://drugdispenser-mz-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "drugdispenser-mz",
-  storageBucket: "drugdispenser-mz.firebasestorage.app",
-  messagingSenderId: "275245012580",
-  appId: "1:275245012580:web:4a10412a5439cf3af97171"
-};
 
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_API_KEY,
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_DATABASE_URL,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID,
+};
 
 export const app = initializeApp(firebaseConfig);
 
