@@ -29,16 +29,17 @@ export const Prescription = () => {
     const handleOTPSend = async() => {
         if(!mobileNumber || isNaN(mobileNumber) ) return; 
         try{
-            const res = await fetch("https://your-vercel-project.vercel.app/api/send-sms", {
+            const res = await fetch("https://sms-service-ib2lcr7v1-prasanth8961s-projects.vercel.app/api/send-sms", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ to:mobileNumber, message: 'OTP send successfully'}),
+                body: JSON.stringify({ to:'+91' + mobileNumber, message: 'OTP for testing..'}),
             });
 
             const data = await res.json();
             console.log(data);
+            setSelectedMedications([])
         //    const msg = await  client.messages.create({
         //     from: +16202936339,
         //     to: '+91' + mobileNumber,
@@ -56,7 +57,7 @@ export const Prescription = () => {
     };
 
     const handleMenuChange = (menuItem) => {
-        setQuantityInput(null);
+        setQuantityInput('');
         setMedicationName(menuItem);
     }
 
