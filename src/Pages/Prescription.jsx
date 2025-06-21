@@ -264,7 +264,7 @@ export const Prescription = () => {
                             <button
                                 onClick={handleOTPSend}
                                 disabled={sending}
-                                className={`mt-4 ml-4 px-6 py-2 rounded text-white transition duration-200 
+                                className={`mt-4 ml-4 px-6 py-2 rounded text-white transition duration-200 cursor-pointer
     ${sending
                                         ? 'bg-blue-900 cursor-not-allowed backdrop-blur-sm opacity-70'
                                         : 'bg-blue-900 hover:bg-blue-950 hover:backdrop-blur-sm hover:opacity-90 hover:shadow-md'}`}

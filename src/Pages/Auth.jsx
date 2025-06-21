@@ -3,6 +3,7 @@ import { FcGoogle } from "react-icons/fc";
 import { app } from '../Firebase/firebase_config';
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, fetchSignInMethodsForEmail, GoogleAuthProvider, getAuth } from 'firebase/auth'
 import { useNavigate } from "react-router-dom";
+import toast from "../Utils/toast";
 
 export const Auth = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -28,7 +29,7 @@ export const Auth = () => {
     const signup = async (email, password) => {
         try {
             const result = await createUserWithEmailAndPassword(auth, email, password);
-            console.log("✅ Signup successful:", result.user);
+            toast.success("✅ Signup successful.")
             const user = result.user;
             const token = await user.getIdToken();
             localStorage.setItem('authToken', token);
@@ -42,18 +43,22 @@ export const Auth = () => {
         } catch (error) {
             switch (error.code) {
                 case "auth/email-already-in-use":
-                    console.error("❌ Email already registered.");
+                    toast.error("❌ This email is already registered.");
                     break;
+
                 case "auth/invalid-email":
-                    console.error("❌ Invalid email format.");
+                    toast.error("❌ Invalid email format.");
                     break;
+
                 case "auth/weak-password":
-                    console.error("❌ Password should be at least 6 characters.");
+                    toast.error("❌ Password should be at least 6 characters.");
                     break;
+
                 default:
-                    console.error("❌ Signup failed:", error.message);
+                    toast.error("❌ Signup failed. Please try again.");
                     break;
             }
+
             return null;
         }
     };
@@ -61,7 +66,7 @@ export const Auth = () => {
     const login = async (email, password) => {
         try {
             const result = await signInWithEmailAndPassword(auth, email, password);
-            console.log("✅ Login successful:", result.user);
+            toast.success("✅ Login successful.")
             const user = result.user;
             const token = await user.getIdToken();
             localStorage.setItem('authToken', token);
@@ -75,26 +80,30 @@ export const Auth = () => {
         } catch (error) {
             switch (error.code) {
                 case "auth/user-not-found":
-                    console.error("❌ No user found with this email.");
+                    toast.error("❌ No user found with this email.");
                     break;
+
                 case "auth/wrong-password":
-                    console.error("❌ Incorrect password.");
+                    toast.error("❌ Incorrect password.");
                     break;
+
                 case "auth/invalid-email":
-                    console.error("❌ Invalid email format.");
+                    toast.error("❌ Invalid email format.");
                     break;
+
                 case "auth/too-many-requests":
-                    console.error("❌ Too many failed attempts. Try again later.");
+                    toast.error("❌ Too many failed attempts. Try again later.");
                     break;
+
                 default:
-                    console.error("❌ Login failed:", error.message);
+                    toast.error("❌ Login failed. Please try again.");
                     break;
             }
             return null;
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
 
@@ -110,10 +119,10 @@ export const Auth = () => {
 
         if (isLogin) {
             console.log("Logging in with:", form.email, form.password);
-            user = login(form.email, form.password);
+            user = await login(form.email, form.password);
         } else {
             console.log("Signing up with:", form.email, form.password);
-            user = signup(form.email, form.password);
+            user = await signup(form.email, form.password);
         }
 
         if (user) {
@@ -127,11 +136,10 @@ export const Auth = () => {
         try {
             const response = await signInWithPopup(auth, provider);
             const user = response.user;
-
-
+            if(user){
+                toast.success('Login successful.')
+            }
             const token = await user.getIdToken();
-
-
             localStorage.setItem("authToken", token);
             localStorage.setItem("user", JSON.stringify({
                 email: user.email,
@@ -139,28 +147,33 @@ export const Auth = () => {
                 displayName: user.displayName,
                 photoURL: user.photoURL
             }));
+
             navigate('/');
         } catch (error) {
             const msg = error.message;
             const code = error.code;
-
             switch (code) {
                 case "auth/popup-closed-by-user":
-                    console.error("Google popup was closed before completing sign in.");
+                    toast.error("❌ Google popup was closed before completing sign-in.");
                     break;
+
                 case "auth/cancelled-popup-request":
-                    console.error("Only one popup request is allowed at a time.");
+                    toast.error("❌ Only one popup request is allowed at a time.");
                     break;
+
                 case "auth/email-already-in-use":
-                    console.error("This email is already in use. Try logging in instead.");
+                    toast.error("❌ This email is already in use. Try logging in instead.");
                     break;
+
                 case "auth/network-request-failed":
-                    console.error("Network error occurred. Please check your connection.");
+                    toast.error("❌ Network error. Please check your connection.");
                     break;
+
                 default:
-                    console.error("Google Auth Error:", msg);
+                    toast.error("❌ Google sign-in failed. Please try again.");
                     break;
             }
+
         }
     }
 
