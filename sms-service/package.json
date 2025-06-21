@@ -5,6 +5,7 @@
     "start": "vercel dev"
   },
   "dependencies": {
-    "twilio": "^4.23.0"
+    "dotenv": "^16.5.0",
+    "twilio": "^4.0.0"
   }
 }
