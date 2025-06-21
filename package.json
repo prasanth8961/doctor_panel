@@ -12,6 +12,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.6.1",
     "@tailwindcss/vite": "^4.0.14",
+    "dotenv": "^16.5.0",
     "firebase": "^11.4.0",
     "firebase-admin": "^13.2.0",
     "react": "^19.0.0",
