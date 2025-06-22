@@ -4,6 +4,7 @@ import { usePost } from "../hooks/usePost";
 import { useUpdate } from "../hooks/useUpadate";
 import AddPatientForm from "../Components/AddPatientForm";
 import { useDebounce } from "../hooks/useDebounce";
+import toast from '../Utils/toast'
 
 const DELAY = 300;
 
@@ -11,8 +12,6 @@ export const Patients = () => {
   const [view, setView] = useState("list");
   const [refresh, setRefresh] = useState(false);
   const { data: patients = [], loading: fetching } = useFetch("patients", refresh);
-  const { postData, loading } = usePost("patients");
-
   const { updateData, loading: updating, error } = useUpdate('patients');
   const [showPatientDetails, setShowPatientDetails] = useState(false);
   const [patientDetails, setPatientDetails] = useState({});
@@ -72,32 +71,15 @@ export const Patients = () => {
       );
     }
 
+    results.sort((a, b) => a.id - b.id);
     setFilteredPatients(results);
   };
-
-
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const patientData = Object.fromEntries(formData.entries());
-    patientData['id'] = new Date().getTime().toString().slice(-4);
-
-    const result = await postData(patientData);
-    if (result) {
-      console.log("Patient added successfully:", result);
-      setFilteredPatients((prev) => [...prev, result]);
-    }
-    e.target.reset();
-  };
-
-
 
   const handleFormUpdate = async (e) => {
     e.preventDefault();
     const result = await updateData(editPatientInfo.id, editPatientInfo);
     if (result) {
-      console.log("Patient updated successfully:", result);
-
+      toast.success("Patient updated successfully.")
       setFilteredPatients((prev) =>
         [...prev.filter((p) => p.id !== result.id), result]
       );
@@ -210,6 +192,10 @@ export const Patients = () => {
     });
   };
 
+  const handleListPatient = () => {
+    setView("list");
+    setRefresh((prev)=>!prev);
+  }
 
   return (
     <div className="select-none relative">
@@ -223,7 +209,7 @@ export const Patients = () => {
             NEW PATIENT
           </div>
           <div
-            onClick={() => setView("list")}
+            onClick={handleListPatient}
             className={`cursor-pointer text-sm lg:text-xl font-semibold text-[#27374D] hover:border-b-2 border-b-cyan-950 ${view === "list" ? "border-b-2" : ""}`}
           >
             LIST PATIENTS
