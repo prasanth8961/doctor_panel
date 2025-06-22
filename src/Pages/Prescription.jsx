@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFetch } from "../hooks/useFetch";
 import { MdShoppingCart } from "react-icons/md";
 import { getDatabase, ref, set } from 'firebase/database'
 import { app } from "../Firebase/firebase_config";
 import { useRef } from "react";
 import toast from "../Utils/toast";
+import { collection, getDocs, getFirestore } from 'firebase/firestore';
+
+const KNOWN_COUNTRY_CODE = ['+91', '+1', '+44', '+61', '+65', '+81', '+49', '+33'];
 
 
 export const Prescription = () => {
@@ -14,11 +17,16 @@ export const Prescription = () => {
     const [quantityInput, setQuantityInput] = useState("");
     const { data: medicationsList, error, loading } = useFetch("medications");
     const [showPop, setShowPop] = useState(false);
+    const [countryCode, setCountryCode] = useState('+91');
     const [mobileNumber, setMobileNumber] = useState('');
+    const [inputBoxSelected, setInputBoxSelected] = useState(false);
+    const [highlightedIndex, setHighlightedIndex] = useState(-1);
     const [sending, setSending] = useState(false);
+    const [patientsPhoneNumber, setPatientsPhoneNumber] = useState([]);
     const dropdownRef = useRef(null);
     const inputRef = useRef(null);
     const addButtonRef = useRef(null);
+
 
 
     const db = getDatabase(app);
@@ -53,7 +61,7 @@ export const Prescription = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ to: '+91' + mobileNumber, message: `Your OTP is - ${OTP}` }),
+                body: JSON.stringify({ to: `${countryCode} ${mobileNumber}`, message: `Your OTP is - ${OTP}` }),
             });
 
             const data = await res.json();
@@ -73,6 +81,7 @@ export const Prescription = () => {
             toast.error("OOPS! something went wrong. Try again.")
         }
         setSending(false);
+        setCountryCode('+91')
     }
 
     const handleRemoveMedication = (name) => {
@@ -93,6 +102,50 @@ export const Prescription = () => {
             setQuantityInput("");
         }
     };
+
+    const handleMobileNumberChanges = (mobileNumberInput) => {
+        const trimmedInput = mobileNumberInput.trim();
+
+        const c_code = KNOWN_COUNTRY_CODE.find(code => trimmedInput.startsWith(code));
+
+        if (!c_code) {
+            toast.warn('Invalid or unknown country code');
+            return;
+        }
+
+        const contact = trimmedInput.slice(c_code.length);
+
+        if (!/^\d{6,}$/.test(contact)) {
+            toast.warn('Invalid mobile number format');
+            return;
+        }
+
+        setCountryCode(c_code);
+        setMobileNumber(contact);
+    };
+
+
+    useEffect(() => {
+        const db = getFirestore(app);
+
+        const fetchPatientPhones = async () => {
+            const querySnapshot = await getDocs(collection(db, 'patients'));
+
+            const phoneNumbers = querySnapshot.docs.map((doc) => {
+                const data = doc.data();
+                return data.personalInfo?.contact?.phone || null;
+            });
+
+            const validPhoneNumbers = phoneNumbers.filter(Boolean);
+            return validPhoneNumbers;
+        };
+        (async () => {
+            const patientContacts = await fetchPatientPhones();
+            setPatientsPhoneNumber(patientContacts);
+        })();
+
+    }, []);
+
 
     return (
         <div className="p-6 select-none">
@@ -203,26 +256,89 @@ export const Prescription = () => {
                     </div>
                 </div>
             )}
-
             {
                 showPop && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-md z-50 ">
+                    <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-md z-50">
                         <div className="bg-white py-6 px-10 pb-10 rounded-lg shadow-lg relative">
-                            <input type="text" onChange={(e) => setMobileNumber(Number(e.target.value.trim()))} name="phoneNumber" id="number" placeholder="Enter phone number" className="border-2 border-gray-300 py-2 px-4 mt-2 rounded-md" />
+                            <div className="flex items-center space-x-2 mt-2">
+                                <select
+                                    value={countryCode}
+                                    onChange={(e) => setCountryCode(e.target.value)}
+                                    className="border-2 border-gray-300 py-2 px-2 rounded-md"
+                                >
+                                    <option value="+91">🇮🇳 +91</option>
+                                    <option value="+1">🇺🇸 +1</option>
+                                    <option value="+44">🇬🇧 +44</option>
+                                    <option value="+61">🇦🇺 +61</option>
+                                </select>
+                                <div className="relative w-full">
+                                    <input
+                                        type="text"
+                                        onFocus={() => setInputBoxSelected(true)}
+                                        onBlur={() => setInputBoxSelected(false)}
+                                        onChange={(e) => setMobileNumber(e.target.value)}
+                                        onClick={() => setInputBoxSelected(true)}
+                                        value={mobileNumber}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'ArrowDown') {
+                                                setHighlightedIndex((prev) =>
+                                                    prev < patientsPhoneNumber.length - 1 ? prev + 1 : 0
+                                                );
+                                            } else if (e.key === 'ArrowUp') {
+                                                setHighlightedIndex((prev) =>
+                                                    prev > 0 ? prev - 1 : patientsPhoneNumber.length - 1
+                                                );
+                                            } else if (e.key === 'Enter' && highlightedIndex !== -1) {
+                                                handleMobileNumberChanges(patientsPhoneNumber[highlightedIndex]);
+                                                setInputBoxSelected(false);
+                                            }
+                                        }}
+                                        className={`py-2 px-4 w-full border border-gray-300 rounded-tr-md rounded-tl-md focus:outline-none box-border  ${inputBoxSelected ? 'cursor-pointer' : 'rounded-bl-md rounded-br-md'}`}
+
+                                    />
+
+
+                                    {inputBoxSelected && (
+                                        <div
+                                            className={`absolute left-0 top-full border border-gray-300 border-t-0  rounded-br-md rounded-bl
+        max-h-49 w-full text-blue-950 text-sm font-semibold bg-white flex flex-col gap-1 z-50 overflow-y-hidden box-border`}
+                                        >
+                                            {patientsPhoneNumber.map((number, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    onMouseDown={() => handleMobileNumberChanges(number)}
+                                                    className={`cursor-pointer py-2 px-2 ${idx === highlightedIndex
+                                                        ? 'bg-cyan-900 text-white'
+                                                        : 'hover:bg-cyan-800 hover:text-white'
+                                                        }`}
+                                                >
+                                                    {number}
+                                                </div>
+                                            ))}
+
+
+
+                                        </div>
+                                    )}
+                                </div>
+
+                            </div>
+
+
+
                             <button
                                 onClick={handleOTPSend}
                                 disabled={sending}
-                                className={`mt-4 ml-4 px-6 py-2 rounded text-white transition duration-200 cursor-pointer
-    ${sending
-                                        ? 'bg-blue-900 cursor-not-allowed backdrop-blur-sm opacity-70'
-                                        : 'bg-blue-900 hover:bg-blue-950 hover:backdrop-blur-sm hover:opacity-90 hover:shadow-md'}`}
+                                className={`w-full mt-4 ml-1 px-6 py-2 rounded text-white transition duration-200 cursor-pointer
+            ${sending
+                                        ? 'bg-cyan-900 cursor-not-allowed backdrop-blur-sm opacity-70'
+                                        : 'bg-cyan-900 hover:bg-blue-950 hover:backdrop-blur-sm hover:opacity-90 hover:shadow-md'}`}
                             >
                                 {sending ? 'Sending...' : 'Send'}
                             </button>
-
                             <div
                                 onClick={() => setShowPop(false)}
-                                className=" absolute top-0 right-0 bg-red-400 px-2 text-white rounded-bl-md rounded-tr-md font-semibold hover:bg-red-500 cursor-pointer"
+                                className="absolute top-0 right-0 bg-red-400 px-2 text-white rounded-bl-md rounded-tr-md font-semibold hover:bg-red-500 cursor-pointer"
                             >
                                 X
                             </div>
