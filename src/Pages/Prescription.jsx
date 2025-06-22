@@ -323,9 +323,6 @@ export const Prescription = () => {
                                 </div>
 
                             </div>
-
-
-
                             <button
                                 onClick={handleOTPSend}
                                 disabled={sending}
