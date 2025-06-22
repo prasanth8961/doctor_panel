@@ -5,8 +5,9 @@ import { MdOutlineNotes } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
 import { SiAegisauthenticator } from "react-icons/si";
 import { BiLogOut } from "react-icons/bi";
-import {app} from '../Firebase/firebase_config';
+import { app } from '../Firebase/firebase_config';
 import { getAuth, signOut } from "firebase/auth";
+import toast from "../Utils/toast";
 
 export const Sidebar = () => {
     const [openNav, setOpenNav] = useState(false);
@@ -14,21 +15,21 @@ export const Sidebar = () => {
 
     const auth = getAuth(app)
 
-    const handleLogout = async() => {
+    const handleLogout = async () => {
         try {
             await signOut(auth);
             localStorage.removeItem("authToken");
             localStorage.removeItem("user");
+            toast.success("Logout successfully.");
             navigate("/auth");
         } catch (err) {
-            console.error("Logout failed:", err.message);
+            toast.error("Logout failed.");
         }
     };
     return (
         <aside
             className={`h-screen ${openNav ? "w-60" : "w-20"} bg-[#1E5F74] text-white flex flex-col items-center gap-5 pt-20 transition-all duration-300 relative `}
         >
-            {/* Toggle Button */}
             <div
                 onClick={() => setOpenNav(!openNav)}
                 className="absolute -right-4 top-2 border-2 bg-amber-50 border-[#1E5F74]  h-8 w-8 flex items-center justify-center rounded-2xl cursor-pointer"
