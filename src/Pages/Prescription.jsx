@@ -4,6 +4,7 @@ import { MdShoppingCart } from "react-icons/md";
 import { getDatabase, ref, set } from 'firebase/database'
 import { app } from "../Firebase/firebase_config";
 import { useRef } from "react";
+import toast from "../Utils/toast";
 
 
 export const Prescription = () => {
@@ -64,11 +65,12 @@ export const Prescription = () => {
                 medsObject.isDispensed = "NO";
                 await set(ref(db, 'prescriptions/' + OTP), medsObject);
             }
+            toast.success("OTP send successfully.");
             setSelectedMedications([])
             setShowPop(false);
             setMobileNumber('')
-        } catch (e) {
-            console.log(e);
+        } catch (_) {
+            toast.error("OOPS! something went wrong. Try again.")
         }
         setSending(false);
     }
@@ -87,6 +89,7 @@ export const Prescription = () => {
         if (value > 0) {
             setQuantityInput(value);
         } else {
+            toast.warn("Please enter valid quantity.")
             setQuantityInput("");
         }
     };
@@ -140,7 +143,7 @@ export const Prescription = () => {
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {
                             handleAddMedication(medicationName);
-                            addButtonRef.current?.focus(); // move focus to button
+                            addButtonRef.current?.focus();
                         } else if (e.key === "ArrowRight") {
                             addButtonRef.current?.focus();
                         } else if (e.key === "ArrowLeft") {
@@ -153,7 +156,7 @@ export const Prescription = () => {
 
                 <div
                     ref={addButtonRef}
-                    tabIndex={0} 
+                    tabIndex={0}
                     className="w-[10%] flex items-center justify-center border border-[#474E68] px-4 py-2 bg-[#474E68] hover:bg-[#272829] cursor-pointer text-white font-bold rounded-lg focus:outline-none"
                     onClick={() => handleAddMedication(medicationName)}
                     onKeyDown={(e) => {
@@ -167,61 +170,6 @@ export const Prescription = () => {
                     ADD
                 </div>
             </div>
-
-            {/* <div className="flex items-center justify-between gap-2">
-                <div className="relative w-[60%] mt-2">
-                    <select
-                        onFocus={() => setIsDropdownOpen(true)}
-                        onBlur={() => setIsDropdownOpen(false)}
-                        className="block w-full px-4 py-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-950 appearance-none cursor-pointer"
-                        onChange={(e) => {
-                            const selected = medicationsList.find((med) => med.value === e.target.value);
-                            if (selected) handleMenuChange(selected.label);
-                        }}
-                        defaultValue=""
-                    >
-                        <option value="" disabled>Select a medication</option>
-                        {medicationsList.map((med) => (
-                            <option key={med.id} value={med.value}>
-                                {med.label}
-                            </option>
-                        ))}
-                    </select>
-
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-gray-700">
-                        {isDropdownOpen ? (
-                            <svg className="fill-current h-4 w-4" viewBox="0 0 20 20">
-                                <path d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414 6.707 12.707a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
-                            </svg>
-                        ) : (
-                            <svg className="fill-current h-4 w-4" viewBox="0 0 20 20">
-                                <path d="M7.293 7.293a1 1 0 011.414 0L12 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                            </svg>
-                        )}
-                    </div>
-                </div>
-
-                <div className="w-[6%] px-4 py-2 border border-white rounded-md flex items-center justify-center ">
-                    X
-                </div>
-
-                <input
-                    type="number"
-                    value={quantityInput}
-                    onChange={handleQuantityInput}
-                    onKeyDown={(e) => e.key === "Enter" && handleAddMedication(medicationName)}
-                    className="rounded border-2 border-gray-200 py-2 px-3 text-base text-gray-800 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-950"
-                    placeholder="Enter quantity"
-                />
-
-
-                <div className="w-[10%] flex items-center justify-center border border-[#474E68] px-4 py-2 bg-[#474E68] hover:bg-[#272829] cursor-pointer text-white font-bold rounded-lg"
-                    onClick={() => handleAddMedication(medicationName)}>
-                    ADD
-                </div>
-
-            </div> */}
-
             {selectedMedications.length > 0 && (
                 <div className="p-4 mt-10 border border-gray-400 rounded-md bg-gray-50 relative">
                     <h3 className="text-lg font-semibold text-[#0A043C]">Selected Medications</h3>
