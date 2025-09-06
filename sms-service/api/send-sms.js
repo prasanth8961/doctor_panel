@@ -1,8 +1,9 @@
-require("dotenv").config();
+
+import twillio from 'twilio';
 
 
 export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*"); 
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
@@ -21,12 +22,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const twilio = require("twilio")(
-      process.env.TWILIO_SID,
-      process.env.TWILIO_AUTH_TOKEN
-    );
+    const client = twillio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
 
-    const result = await twilio.messages.create({
+    const result = await client.messages.create({
       body: message,
       from: process.env.TWILIO_PHONE,
       to: to,

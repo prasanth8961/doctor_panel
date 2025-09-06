@@ -56,7 +56,7 @@ export const Prescription = () => {
         setSending(true);
         const OTP = await generateOTP()
         try {
-            const res = await fetch("https://sms-service-ib2lcr7v1-prasanth8961s-projects.vercel.app/api/send-sms", {
+            const res = await fetch("https://sms-service-h6nc3m4ky-prasanth8961s-projects.vercel.app/api/send-sms", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
