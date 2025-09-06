@@ -10,6 +10,9 @@ This platform helps doctors to:
 
 ---
 
+## Live Demo
+- https://doctor-panel-git-main-prasanth8961s-projects.vercel.app
+
 ## 📱 Features
 
 - ✅ **Patient Management**  
